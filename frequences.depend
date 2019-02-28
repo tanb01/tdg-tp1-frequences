@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1550682440 source:d:\ben\documents\ben folder\homework\ece\ing2\theorie des graphes\tp1_mrfercoq_frequences\main.cpp
+	<iostream>
+	<iomanip>
+	<fstream>
+	<string>
+	<vector>
+	<algorithm>
+	<cmath>
+

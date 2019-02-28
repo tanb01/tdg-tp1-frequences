@@ -18,164 +18,206 @@ inline double norme(double vx, double vy)
 /// durant le chargement du fichier, en fonction du paramètre
 class Station
 {
-    private:
-        /// Voisinage : liste d'adjacence
-        std::vector<const Station*> m_adjacents;
+private:
+    /// Voisinage : liste d'adjacence
+    std::vector<const Station*> m_adjacents;
 
-        /// Données spécifiques du sommet
-        int m_id;        // Indice numérique pour l'affichage
-        double m_x, m_y; // Position sur le terrain
-        int m_frequence; // Fréquence affectée (ou 0 si pas encore de fréquence)
+    /// Données spécifiques du sommet
+    int m_id;        // Indice numérique pour l'affichage
+    double m_x, m_y; // Position sur le terrain
+    int m_frequence; // Fréquence affectée (ou 0 si pas encore de fréquence)
 
-    public:
+public:
 
-        /// La construction se fait directement depuis le fichier ouvert en cours de lecture...
-        Station(std::istream& is)
-        {
-            is >> m_id >> m_x >> m_y;
-            if ( is.fail() )
-                throw std::runtime_error("Probleme lecture id,x,y d'une station");
-            m_frequence = 0;
-        }
+    /// La construction se fait directement depuis le fichier ouvert en cours de lecture...
+    Station(std::istream& is)
+    {
+        is >> m_id >> m_x >> m_y;
+        if ( is.fail() )
+            throw std::runtime_error("Probleme lecture id,x,y d'une station");
+        m_frequence = 0;
+    }
 
-        /// Méthode de calcul de distance à une autre station (pour déterminer le voisinage)
-        double distance(const Station* autre) const
-        {
-            return norme( autre->m_x - m_x, autre->m_y - m_y  );
-        }
+    /// Méthode de calcul de distance à une autre station (pour déterminer le voisinage)
+    double distance(const Station* autre) const
+    {
+        return norme( autre->m_x - m_x, autre->m_y - m_y  );
+    }
 
-        /// Méthode de détermination des stations adjacentes ( distance < dmin )
-        void determineAdjacents(const std::vector<Station*>& stations, double dmin)
-        {
-            for (auto s : stations)
-                if ( distance(s)<dmin && s!=this )
-                    m_adjacents.push_back(s);
-        }
+    /// Méthode de détermination des stations adjacentes ( distance < dmin )
+    void determineAdjacents(const std::vector<Station*>& stations, double dmin)
+    {
+        for (auto s : stations)
+            if ( distance(s)<dmin && s!=this )
+                m_adjacents.push_back(s);
+    }
 
-        /// Retourne le degré du sommet ( = nombre d'arêtes incidentes = nombre de sommets adjacents )
-        int getDegre() const
-        {
-            return (int)m_adjacents.size();
-        }
+    /// Retourne le degré du sommet ( = nombre d'arêtes incidentes = nombre de sommets adjacents )
+    int getDegre() const
+    {
+        return (int)m_adjacents.size();
+    }
 
-        /// Retourne la frequence (numéro de fréquence) actuellement affecté à la station
-        /// Par convention la valeur 0 indique "pas encore de fréquence affectée"
-        int getFrequence() const
-        {
-            return m_frequence;
-        }
+    /// Retourne la frequence (numéro de fréquence) actuellement affecté à la station
+    /// Par convention la valeur 0 indique "pas encore de fréquence affectée"
+    int getFrequence() const
+    {
+        return m_frequence;
+    }
 
-        /// Affecte une fréquence à la station
-        void setFrequence(int frequence)
-        {
-            m_frequence = frequence;
-        }
+    /// Affecte une fréquence à la station
+    void setFrequence(int frequence)
+    {
+        m_frequence = frequence;
+    }
 
-        /// Test l'affectation d'une fréquence
-        /// retourne vrai si la fréquence n'est pas en conflit avec une station adjacente
-        /// faux sinon
-        bool testFrequence(int frequence)
-        {
-            for (auto s : m_adjacents)
-                if ( s->m_frequence && s->m_frequence == frequence )
-                    return false;
+    /// Test l'affectation d'une fréquence
+    /// retourne vrai si la fréquence n'est pas en conflit avec une station adjacente
+    /// faux sinon
+    bool testFrequence(int frequence)
+    {
+        for (auto s : m_adjacents)
+            if ( s->m_frequence && s->m_frequence == frequence )
+                return false;
 
-            return true;
-        }
+        return true;
+    }
 
-        /// Surcharge de l'opérateur d'insertion vers un flot de sortie
-        /// c'est la "méthode d'affichage" des objets de type Station
-        friend std::ostream& operator<<(std::ostream& out, const Station& s)
-        {
-            out << "id=" << std::setw(2) << s.m_id << "  x=" << s.m_x << "  y=" << s.m_y << "  freq=" << s.m_frequence << "  Adjacents=";
-            for (const auto a : s.m_adjacents)
-                out << a->m_id << " ";
-            out << std::endl;
-            return out;
-        }
+    /// Surcharge de l'opérateur d'insertion vers un flot de sortie
+    /// c'est la "méthode d'affichage" des objets de type Station
+    friend std::ostream& operator<<(std::ostream& out, const Station& s)
+    {
+        out << "id=" << std::setw(2) << s.m_id << "  x=" << s.m_x << "  y=" << s.m_y << "  freq=" << s.m_frequence << "  Adjacents=";
+        for (const auto a : s.m_adjacents)
+            out << a->m_id << " ";
+        out << std::endl;
+        return out;
+    }
 
 };
 
 /// La classe Reseau représente un graphe dans son ensemble
 class Reseau
 {
-    private:
-        /// Le réseau est constitué d'une collection de stations
-        std::vector<Station*> m_stations;
+private:
+    /// Le réseau est constitué d'une collection de stations
+    std::vector<Station*> m_stations;
 
-    public:
-        /// La construction du réseau se fait à partir d'un fichier
-        /// dont le nom est passé en paramètre
-        Reseau(std::string nomFichier)
+public:
+    /// La construction du réseau se fait à partir d'un fichier
+    /// dont le nom est passé en paramètre
+    Reseau(std::string nomFichier)
+    {
+        std::ifstream ifs{nomFichier};
+        if (!ifs)
+            throw std::runtime_error( "Impossible d'ouvrir en lecture " + nomFichier );
+
+        double dmin;
+        ifs >> dmin;
+        if ( ifs.fail() )
+            throw std::runtime_error("Probleme lecture dmin entre stations");
+
+        int ordre;
+        ifs >> ordre;
+        if ( ifs.fail() )
+            throw std::runtime_error("Probleme lecture ordre du graphe");
+
+        for (int i=0; i<ordre; ++i)
+            m_stations.push_back( new Station{ifs} );
+
+        for (auto s : m_stations)
+            s->determineAdjacents(m_stations, dmin);
+    }
+
+    /// Destructeur du réseau. Les stations ont été allouées dynamiquement
+    /// lors de la création d'une instance reseau, le réseau est responsable de leur libération
+    ~Reseau()
+    {
+        for (auto s : m_stations)
+            delete s;
+    }
+
+    /// Retourne l'odre du graphe (ordre = nombre de sommets)
+    int getOrdre() const
+    {
+        return (int)m_stations.size();
+    }
+
+    /// Remet toutes les fréquences des stations à 0 (non affectées)
+    void resetFrequences()
+    {
+        for (auto s : m_stations)
+            s->setFrequence(0);
+    }
+
+    /// Surcharge de l'opérateur d'insertion vers un flot de sortie
+    /// c'est la "méthode d'affichage" des objets de type Reseau
+    friend std::ostream& operator<<(std::ostream& out, const Reseau& r)
+    {
+        out << "Reseau d'ordre " << r.getOrdre() << " :" << std::endl;
+        for (const auto s : r.m_stations)
+            out << *s;
+        out << std::endl;
+        return out;
+    }
+
+    /// ************* CODE ETUDIANT *************
+    void attribuerNaif(int& nbFrequences)
+    {
+        /// A COMPLETER
+
+        resetFrequences();
+        int n=0;
+        int freq;
+
+        for (auto s : m_stations)
         {
-            std::ifstream ifs{nomFichier};
-            if (!ifs)
-                throw std::runtime_error( "Impossible d'ouvrir en lecture " + nomFichier );
-
-            double dmin;
-            ifs >> dmin;
-            if ( ifs.fail() )
-                throw std::runtime_error("Probleme lecture dmin entre stations");
-
-            int ordre;
-            ifs >> ordre;
-            if ( ifs.fail() )
-                throw std::runtime_error("Probleme lecture ordre du graphe");
-
-            for (int i=0; i<ordre; ++i)
-                m_stations.push_back( new Station{ifs} );
-
-            for (auto s : m_stations)
-                s->determineAdjacents(m_stations, dmin);
+            freq=1;
+            while (s->testFrequence(freq) == false)
+            {
+                ++freq;
+            }
+            s->setFrequence(freq);
+            if (freq>=n)
+            {
+                n=freq;
+            }
         }
+        nbFrequences = n;
+    }
 
-        /// Destructeur du réseau. Les stations ont été allouées dynamiquement
-        /// lors de la création d'une instance reseau, le réseau est responsable de leur libération
-        ~Reseau()
+    void attribuerWelshPowell(int& nbFrequences)
+    {
+        /// A COMPLETER
+        std::sort(m_stations.begin(), m_stations.end(), [](Station* s1, Station* s2)
         {
-            for (auto s : m_stations)
-                delete s;
-        }
+            return s1->getDegre() > s2->getDegre();
+        });
 
-        /// Retourne l'odre du graphe (ordre = nombre de sommets)
-        int getOrdre() const
+        resetFrequences();
+        int n=0;
+        int freq;
+
+        for (auto s : m_stations)
         {
-            return (int)m_stations.size();
+            freq=1;
+            while (s->testFrequence(freq) == false)
+            {
+                ++freq;
+            }
+            s->setFrequence(freq);
+            if (freq>=n)
+            {
+                n=freq;
+            }
         }
+        nbFrequences = n;
+    }
+    /// ************* FIN CODE ETUDIANT *************
 
-        /// Remet toutes les fréquences des stations à 0 (non affectées)
-        void resetFrequences()
-        {
-            for (auto s : m_stations)
-                s->setFrequence(0);
-        }
-
-        /// Surcharge de l'opérateur d'insertion vers un flot de sortie
-        /// c'est la "méthode d'affichage" des objets de type Reseau
-        friend std::ostream& operator<<(std::ostream& out, const Reseau& r)
-        {
-            out << "Reseau d'ordre " << r.getOrdre() << " :" << std::endl;
-            for (const auto s : r.m_stations)
-                out << *s;
-            out << std::endl;
-            return out;
-        }
-
-        /// ************* CODE ETUDIANT *************
-        void attribuerNaif(int& nbFrequences)
-        {
-           /// A COMPLETER
-        }
-
-        void attribuerWelshPowell(int& nbFrequences)
-        {
-           /// A COMPLETER
-        }
-        /// ************* FIN CODE ETUDIANT *************
-
-        /// Méthode "optimale", détermination du nombre chromatique.
-        /// Voir implémentation après le main
-        void attribuerSystematique(int& nbFrequences);
+    /// Méthode "optimale", détermination du nombre chromatique.
+    /// Voir implémentation après le main
+    void attribuerSystematique(int& nbFrequences);
 };
 
 
@@ -188,16 +230,16 @@ int main()
         std::cout << reseau;
 
         /// Coloration algorithme "naïf" et affichage
-        /*int nbFreqNaif;
+        int nbFreqNaif;
         reseau.attribuerNaif(nbFreqNaif);
         std::cout << "Naif : " << nbFreqNaif << " frequences utilisees" << std::endl;
-        std::cout << reseau;*/
+        std::cout << reseau;
 
         /// Coloration algorithme "Welsh et Powell" et affichage
-        /*int nbFreqWP;
+        int nbFreqWP;
         reseau.attribuerWelshPowell(nbFreqWP);
         std::cout << "Welsh & Powell : " << nbFreqWP << " frequences utilisees" << std::endl;
-        std::cout << reseau;*/
+        std::cout << reseau;
 
         /// Coloration algorithme "Systématique" et affichage
         int nbFreqSyst;
