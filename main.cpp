@@ -1,4 +1,4 @@
-/* code réalisé par Mr. Fercoq */
+/* Code a trous réalisé par Mr. Fercoq */
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -189,6 +189,7 @@ public:
     void attribuerWelshPowell(int& nbFrequences)
     {
         /// A COMPLETER
+
         std::sort(m_stations.begin(), m_stations.end(), [](Station* s1, Station* s2)
         {
             return s1->getDegre() > s2->getDegre();
@@ -251,6 +252,8 @@ int main()
     {
         std::cerr << "Attention : " << e.what() << std::endl;
     }
+
+    system("pause");
 
     return 0;
 }
